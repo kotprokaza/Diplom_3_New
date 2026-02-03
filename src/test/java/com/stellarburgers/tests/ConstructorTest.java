@@ -18,37 +18,37 @@ public class ConstructorTest extends BaseTest {
     public void switchToBunsSection() {
         driver.get(Constants.BASE_URL);
         MainPage mainPage = new MainPage(driver);
-        
+
         mainPage.clickBunsSection();
-        
+
         // Ожидания внутри метода clickBunsSection()
         assertTrue("Раздел 'Булки' должен быть активным",
                 mainPage.isBunsSectionActive());
     }
-    
+
     @Test
     @DisplayName("Переключение на раздел 'Соусы'")
     @Description("Тест проверяет, что при клике на раздел 'Соусы' он становится активным")
     public void switchToSaucesSection() {
         driver.get(Constants.BASE_URL);
         MainPage mainPage = new MainPage(driver);
-        
+
         mainPage.clickSaucesSection();
-        
+
         // Ожидания внутри метода clickSaucesSection()
         assertTrue("Раздел 'Соусы' должен быть активным",
                 mainPage.isSaucesSectionActive());
     }
-    
+
     @Test
     @DisplayName("Переключение на раздел 'Начинки'")
     @Description("Тест проверяет, что при клике на раздел 'Начинки' он становится активным")
     public void switchToFillingsSection() {
         driver.get(Constants.BASE_URL);
         MainPage mainPage = new MainPage(driver);
-        
+
         mainPage.clickFillingsSection();
-        
+
         // Ожидания внутри метода clickFillingsSection()
         assertTrue("Раздел 'Начинки' должен быть активным",
                 mainPage.isFillingsSectionActive());

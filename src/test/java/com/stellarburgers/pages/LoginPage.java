@@ -17,6 +17,7 @@ public class LoginPage {
     private final By emailField = By.xpath("//input[@type='text' and @name='name']");
     private final By passwordField = By.xpath("//input[@type='password']");
     private final By loginButton = By.xpath("//button[text()='Войти']");
+    private final By personalAccountButton = By.xpath(".//p[text()='Личный Кабинет']/parent::a");
 
     public LoginPage(WebDriver driver) {
         this.driver = driver;
@@ -48,6 +49,15 @@ public class LoginPage {
         fillEmailField(email);
         fillPasswordField(password);
         clickLoginButton();
+
+        // Ждем успешной авторизации - либо появление кнопки "Личный Кабинет", либо переход на главную
+        try {
+            wait.until(ExpectedConditions.presenceOfElementLocated(personalAccountButton));
+        } catch (Exception e) {
+            // Если не нашли кнопку "Личный Кабинет", возможно мы еще на странице логина
+            // или произошла ошибка авторизации
+            System.out.println("Не удалось найти элемент после авторизации: " + e.getMessage());
+        }
     }
 
     @Step("Проверить что открыта страница авторизации")
