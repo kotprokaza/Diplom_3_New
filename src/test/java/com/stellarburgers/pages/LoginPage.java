@@ -49,14 +49,16 @@ public class LoginPage {
         fillEmailField(email);
         fillPasswordField(password);
         clickLoginButton();
+    }
 
-        // Ждем успешной авторизации - либо появление кнопки "Личный Кабинет", либо переход на главную
+    @Step("Ожидание успешной авторизации")
+    public void waitForSuccessfulLogin() {
         try {
-            wait.until(ExpectedConditions.presenceOfElementLocated(personalAccountButton));
+            wait.until(ExpectedConditions.not(
+                    ExpectedConditions.urlContains("login")
+            ));
         } catch (Exception e) {
-            // Если не нашли кнопку "Личный Кабинет", возможно мы еще на странице логина
-            // или произошла ошибка авторизации
-            System.out.println("Не удалось найти элемент после авторизации: " + e.getMessage());
+            System.out.println("Не удалось дождаться успешной авторизации: " + e.getMessage());
         }
     }
 
@@ -68,5 +70,10 @@ public class LoginPage {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    @Step("Получить текущий URL")
+    public String getCurrentUrl() {
+        return driver.getCurrentUrl();
     }
 }

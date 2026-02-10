@@ -98,4 +98,9 @@ public class MainPage {
     private void waitForSectionActive(String sectionName) {
         wait.until(driver -> isSectionActive(sectionName));
     }
+
+    @Step("Ожидание загрузки главной страницы")
+    public void waitForMainPageLoad() {
+        wait.until(ExpectedConditions.urlContains("stellarburgers"));
+    }
 }

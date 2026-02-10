@@ -5,10 +5,6 @@ import com.stellarburgers.Constants;
 import com.stellarburgers.pages.*;
 import io.qameta.allure.Description;
 import org.junit.Test;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-
-import java.time.Duration;
 
 import static org.junit.Assert.assertTrue;
 
@@ -26,17 +22,15 @@ public class RegistrationTest extends BaseTest {
         driver.get(Constants.REGISTER_URL);
         RegisterPage registerPage = new RegisterPage(driver);
 
-        // Проверяем что открыта страница регистрации (используем метод Page Object)
+        // Проверяем что открыта страница регистрации
         assertTrue("Страница регистрации не отображается",
                 registerPage.isRegisterPageDisplayed());
 
-        // Регистрируем пользователя (используем метод Page Object)
+        // Регистрируем пользователя
         registerPage.register(name, email, password);
 
-        // Проверяем успешную регистрацию через переход на страницу логина
-        // Используем WebDriverWait вместо Thread.sleep
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.urlContains("login"));
+        // Ожидаем перехода на страницу логина через метод Page Object
+        registerPage.waitForLoginPageRedirect();
 
         LoginPage loginPage = new LoginPage(driver);
         assertTrue("После регистрации не открылась страница логина",
@@ -62,17 +56,7 @@ public class RegistrationTest extends BaseTest {
         // Регистрируем пользователя с коротким паролем
         registerPage.register(name, email, shortPassword);
 
-        // Проверяем отображение ошибки пароля
-        // Используем WebDriverWait для ожидания появления ошибки
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        try {
-            wait.until(ExpectedConditions.visibilityOfElementLocated(
-                    registerPage.getPasswordErrorLocator() // Нужно добавить этот метод в RegisterPage
-            ));
-        } catch (Exception e) {
-            // Если не появилась ошибка, тест упадет
-        }
-
+        // Проверяем отображение ошибки пароля через метод Page Object
         assertTrue("Ошибка пароля не отображается",
                 registerPage.isPasswordErrorDisplayed());
     }

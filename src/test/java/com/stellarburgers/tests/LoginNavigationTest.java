@@ -7,95 +7,81 @@ import com.stellarburgers.api.UserClient;
 import com.stellarburgers.pages.*;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-
-import java.time.Duration;
 
 import static org.junit.Assert.assertTrue;
 
 @DisplayName("Тесты навигации и авторизации")
 public class LoginNavigationTest extends BaseTest {
 
+    private User testUser;
+    private String accessToken;
+
+    @Before
+    @DisplayName("Создание тестового пользователя")
+    @Description("Создание пользователя через API перед выполнением тестов")
+    public void setUpUser() {
+        // Создаем тестового пользователя через API
+        testUser = UserClient.createRandomUser();
+        accessToken = testUser.getAccessToken();
+        System.out.println("Создан пользователь: " + testUser.getEmail());
+    }
+
+    @After
+    @DisplayName("Удаление тестового пользователя")
+    @Description("Удаление пользователя через API после выполнения тестов")
+    public void tearDownUser() {
+        // Удаляем тестового пользователя после теста
+        if (accessToken != null && !accessToken.isEmpty()) {
+            UserClient.deleteUser(accessToken);
+            System.out.println("Удален пользователь: " + testUser.getEmail());
+        }
+    }
+
     @Test
     @DisplayName("Успешная авторизация с вводом логина и пароля")
     @Description("Полная процедура авторизации: ввод логина и пароля, клик по кнопке 'Войти'")
     public void successfulLoginWithCredentials() {
-        // Создаем тестового пользователя через API
-        User testUser = UserClient.createRandomUser();
-        String accessToken = testUser.getAccessToken();
+        // Открываем страницу логина
+        driver.get(Constants.LOGIN_URL);
+        LoginPage loginPage = new LoginPage(driver);
 
-        try {
-            // Открываем страницу логина
-            driver.get(Constants.LOGIN_URL);
-            LoginPage loginPage = new LoginPage(driver);
+        // Полная процедура авторизации через методы Page Object
+        loginPage.login(testUser.getEmail(), testUser.getPassword());
 
-            // Полная процедура авторизации
-            loginPage.login(testUser.getEmail(), testUser.getPassword());
+        // Ожидаем успешной авторизации через метод Page Object
+        loginPage.waitForSuccessfulLogin();
 
-            // Проверяем успешный логин
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-            wait.until(ExpectedConditions.not(
-                    ExpectedConditions.urlContains("login")
-            ));
-
-            wait.until(driver ->
-                    driver.getCurrentUrl().contains(Constants.BASE_URL) ||
-                            driver.getCurrentUrl().contains("account")
-            );
-
-            String currentUrl = driver.getCurrentUrl();
-            assertTrue("После авторизации не открылась главная страница или личный кабинет. Текущий URL: " + currentUrl,
-                    currentUrl.contains(Constants.BASE_URL) || currentUrl.contains("account"));
-
-        } finally {
-            // Удаляем тестового пользователя после теста
-            if (accessToken != null && !accessToken.isEmpty()) {
-                UserClient.deleteUser(accessToken);
-            }
-        }
+        // Проверяем успешный логин
+        String currentUrl = loginPage.getCurrentUrl();
+        assertTrue("После авторизации не открылась главная страница или личный кабинет. Текущий URL: " + currentUrl,
+                currentUrl.contains(Constants.BASE_URL) || currentUrl.contains("account"));
     }
 
     @Test
     @DisplayName("Переход в личный кабинет после авторизации")
     @Description("Проверка возможности перехода в личный кабинет после успешной авторизации")
     public void navigateToPersonalAccountAfterLogin() {
-        // Создаем тестового пользователя через API
-        User testUser = UserClient.createRandomUser();
-        String accessToken = testUser.getAccessToken();
+        // Открываем страницу логина
+        driver.get(Constants.LOGIN_URL);
+        LoginPage loginPage = new LoginPage(driver);
 
-        try {
-            // Открываем страницу логина
-            driver.get(Constants.LOGIN_URL);
-            LoginPage loginPage = new LoginPage(driver);
+        // Авторизуемся через методы Page Object
+        loginPage.login(testUser.getEmail(), testUser.getPassword());
+        loginPage.waitForSuccessfulLogin();
 
-            // Авторизуемся
-            loginPage.login(testUser.getEmail(), testUser.getPassword());
+        // Переходим в личный кабинет через методы Page Object
+        MainPage mainPage = new MainPage(driver);
+        mainPage.clickPersonalAccountButton();
 
-            // Ждем успешной авторизации
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-            wait.until(ExpectedConditions.not(
-                    ExpectedConditions.urlContains("login")
-            ));
+        // Проверяем что открылся личный кабинет через методы Page Object
+        ProfilePage profilePage = new ProfilePage(driver);
+        profilePage.waitForProfilePageLoad();
 
-            // Переходим в личный кабинет
-            MainPage mainPage = new MainPage(driver);
-            mainPage.clickPersonalAccountButton();
-
-            // Проверяем что открылся личный кабинет
-            wait.until(ExpectedConditions.urlContains("account"));
-
-            ProfilePage profilePage = new ProfilePage(driver);
-            assertTrue("Личный кабинет не отображается",
-                    profilePage.isProfilePageDisplayed());
-
-        } finally {
-            // Удаляем тестового пользователя после теста
-            if (accessToken != null && !accessToken.isEmpty()) {
-                UserClient.deleteUser(accessToken);
-            }
-        }
+        assertTrue("Личный кабинет не отображается",
+                profilePage.isProfilePageDisplayed());
     }
 
     @Test

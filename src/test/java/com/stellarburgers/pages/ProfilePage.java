@@ -19,6 +19,12 @@ public class ProfilePage {
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
+    @Step("Ожидание загрузки страницы профиля")
+    public void waitForProfilePageLoad() {
+        wait.until(ExpectedConditions.urlContains("account"));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(profileLink));
+    }
+
     @Step("Проверить что открыт личный кабинет")
     public boolean isProfilePageDisplayed() {
         try {

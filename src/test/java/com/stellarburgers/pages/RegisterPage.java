@@ -91,4 +91,9 @@ public class RegisterPage {
             return false;
         }
     }
+
+    @Step("Ожидание перехода на страницу логина после регистрации")
+    public void waitForLoginPageRedirect() {
+        wait.until(ExpectedConditions.urlContains("login"));
+    }
 }
